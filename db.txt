@@ -1,0 +1,69 @@
+# database.py
+import sqlite3
+
+def set_user_locale(user_id: int, locale: str):
+    with sqlite3.connect("birthdays.db") as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS user_locales (
+                user_id INTEGER PRIMARY KEY,
+                locale TEXT
+            )
+        """)
+        cur.execute("REPLACE INTO user_locales (user_id, locale) VALUES (?, ?)", (user_id, locale))
+        conn.commit()
+
+def get_user_locale(user_id: int) -> str:
+    with sqlite3.connect("birthdays.db") as conn:
+        cur = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS user_locales (user_id INTEGER PRIMARY KEY, locale TEXT)")
+        cur.execute("SELECT locale FROM user_locales WHERE user_id = ?", (user_id,))
+        row = cur.fetchone()
+        return row[0] if row else 'ru'
+
+def init_db():
+    with sqlite3.connect("birthdays.db") as conn:
+        cur = conn.cursor()
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS birthdays (
+                id INTEGER PRIMARY KEY,
+                name TEXT,
+                date TEXT,
+                note TEXT,
+                contact TEXT
+            )
+        ''')
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS user_locales (
+                user_id INTEGER PRIMARY KEY,
+                locale TEXT
+            )
+        ''')
+        conn.commit()
+
+def add_birthday(name, date, note='', contact=''):
+    with sqlite3.connect("birthdays.db") as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO birthdays (name, date, note, contact) VALUES (?, ?, ?, ?)",
+            (name, date, note, contact)
+        )
+        conn.commit()
+
+def get_birthdays():
+    with sqlite3.connect("birthdays.db") as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT name, date FROM birthdays ORDER BY date")
+        return [dict(name=row[0], date=row[1]) for row in cur.fetchall()]
+
+def delete_birthday(name):
+    with sqlite3.connect("birthdays.db") as conn:
+        cur = conn.cursor()
+        cur.execute("DELETE FROM birthdays WHERE name = ?", (name,))
+        return cur.rowcount > 0
+
+def edit_birthday(name, new_date):
+    with sqlite3.connect("birthdays.db") as conn:
+        cur = conn.cursor()
+        cur.execute("UPDATE birthdays SET date = ? WHERE name = ?", (new_date, name))
+        return cur.rowcount > 0

@@ -1,0 +1,36 @@
+import asyncio
+import logging
+
+from aiogram import Bot, Dispatcher
+from aiogram.enums import ParseMode
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.client.default import DefaultBotProperties
+
+from handlers import register_handlers
+from reminder import scheduler_start
+from database import init_db
+from i18n import setup_i18n
+from config import API_TOKEN
+
+logging.basicConfig(level=logging.INFO)
+
+async def main():
+    from aiogram.client.default import DefaultBotProperties
+
+    bot = Bot(
+        token=API_TOKEN,
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+    )
+
+    dp = Dispatcher(storage=MemoryStorage())
+
+    setup_i18n(dp)
+    register_handlers(dp)
+
+    init_db()
+    await scheduler_start(bot)
+
+    await dp.start_polling(bot)
+
+if __name__ == '__main__':
+    asyncio.run(main())

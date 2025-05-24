@@ -1,0 +1,39 @@
+msgid ""
+msgstr ""
+"Language: en\n"
+
+msgid "Добро пожаловать! Выберите действие в меню."
+msgstr "Welcome! Choose an action from the menu."
+
+msgid "Список пуст."
+msgstr "The list is empty."
+
+msgid "Удалено."
+msgstr "Deleted."
+
+msgid "Не найдено."
+msgstr "Not found."
+
+msgid "Обновлено."
+msgstr "Updated."
+
+msgid "Ошибка обновления."
+msgstr "Update failed."
+
+msgid "Неверный формат. Пример: /edit Иван 13.07"
+msgstr "Invalid format. Example: /edit Ivan 13.07"
+
+msgid "Нет доступа."
+msgstr "Access denied."
+
+msgid "Введите текст рассылки."
+msgstr "Enter the message to broadcast."
+
+msgid "Рассылка отправлена: 
+"
+msgstr "Broadcast sent:
+"
+
+msgid "Выберите язык:"
+msgstr "Choose a language:"
+
