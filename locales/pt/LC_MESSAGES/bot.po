@@ -29,11 +29,22 @@ msgstr "Sem acesso."
 msgid "Введите текст рассылки."
 msgstr "Digite a mensagem para enviar."
 
-msgid "Рассылка отправлена: 
-"
-msgstr "Mensagem enviada:
-"
+msgid "Рассылка отправлена:"
+msgstr "Mensagem enviada:"
 
 msgid "Выберите язык:"
 msgstr "Escolha o idioma:"
+
+msgid "Список"
+msgstr "Lista"
+
+msgid "Добавить"
+msgstr "Adicionar"
+
+msgid "Рассылка"
+msgstr "Boletim info"
+
+msgid "Настройки"
+msgstr "Configurações"
+
 
