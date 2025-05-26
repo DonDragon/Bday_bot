@@ -1,5 +1,7 @@
+import logging
 from pathlib import Path
 from aiogram import types, Dispatcher
+from aiogram.types import Update
 from aiogram.utils.i18n import I18n, I18nMiddleware
 from aiogram.utils.i18n.middleware import I18nMiddleware
 from aiogram.types import Message, CallbackQuery
@@ -19,7 +21,17 @@ class CustomI18nMiddleware(I18nMiddleware):
     async def get_locale(self, event, data: dict) -> str:
         user_id = None
         tg_locale = 'en'
-        if isinstance(event, Message) and event.from_user:
+
+        # Если это Update, достаём message или callback_query
+        if isinstance(event, Update):
+            if event.message and event.message.from_user:
+                user_id = event.message.from_user.id
+                tg_locale = getattr(event.message.from_user, 'language_code', 'en')[:2]
+            elif event.callback_query and event.callback_query.from_user:
+                user_id = event.callback_query.from_user.id
+                tg_locale = getattr(event.callback_query.from_user, 'language_code', 'en')[:2]
+        # Если это Message (редко, но вдруг)
+        elif isinstance(event, Message) and event.from_user:
             user_id = event.from_user.id
             tg_locale = getattr(event.from_user, 'language_code', 'en')[:2]
         elif isinstance(event, CallbackQuery) and event.from_user:
@@ -30,12 +42,12 @@ class CustomI18nMiddleware(I18nMiddleware):
             user_id = event.from_user.id
             tg_locale = getattr(event.from_user, 'language_code', 'en')[:2]
 
-        print(f"Получение Id пользователя {user_id} с языком {tg_locale}")
+        logging.info(f"Получение Id пользователя {user_id} с языком {tg_locale}")
         # Если user_id не None, пытаемся получить локаль из базы
         
         if user_id is not None:
             db_locale = get_user_locale(user_id)
-            print(f"Получение локали для пользователя {user_id}: {db_locale}")
+            logging.info(f"Получение локали для пользователя {user_id}: {db_locale}")
             if db_locale:
                 return db_locale
             # если нет в базе — записываем и возвращаем
@@ -51,7 +63,7 @@ class CustomI18nMiddleware(I18nMiddleware):
             else:
                 set_user_locale(user_id, 'en')
                 return 'en'
-        print(f"Не удалось определить пользователя, возвращаем en")
+        logging.info(f"Не удалось определить пользователя, возвращаем en")
         return 'en'
 
 

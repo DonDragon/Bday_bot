@@ -28,13 +28,9 @@ async def main():
     setup_i18n(dp)
     register_handlers(dp)
 
-    db_path = os.path.abspath("birthdays.db")
-    print(f"Используется база: {db_path}")
-
     init_db()
 
     db_path = os.path.abspath("birthdays.db")
-    print(f"Используется база: {db_path}")
     logging.info(f"Используется база: {db_path}")
 
     # Запуск планировщика

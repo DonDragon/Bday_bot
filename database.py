@@ -18,7 +18,7 @@ def get_user_locale(user_id: int) -> str:
         cur = conn.cursor()
         cur.execute("SELECT locale FROM user_locales WHERE user_id = ?", (user_id,))
         row = cur.fetchone()
-        return row[0] if row else 'ru'
+        return row[0] if row else None
 
 def init_db():
     with sqlite3.connect("birthdays.db") as conn:
