@@ -11,6 +11,7 @@ from reminder import scheduler_start
 from database import init_db
 from i18n import setup_i18n
 from config import API_TOKEN
+import os
 
 logging.basicConfig(level=logging.INFO)
 
@@ -27,7 +28,16 @@ async def main():
     setup_i18n(dp)
     register_handlers(dp)
 
+    db_path = os.path.abspath("birthdays.db")
+    print(f"Используется база: {db_path}")
+
     init_db()
+
+    db_path = os.path.abspath("birthdays.db")
+    print(f"Используется база: {db_path}")
+    logging.info(f"Используется база: {db_path}")
+
+    # Запуск планировщика
     await scheduler_start(bot)
 
     await dp.start_polling(bot)

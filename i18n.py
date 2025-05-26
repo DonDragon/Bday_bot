@@ -2,6 +2,7 @@ from pathlib import Path
 from aiogram import types, Dispatcher
 from aiogram.utils.i18n import I18n, I18nMiddleware
 from aiogram.utils.i18n.middleware import I18nMiddleware
+from aiogram.types import Message, CallbackQuery
 from config import I18N_DOMAIN
 from database import get_user_locale, set_user_locale
 
@@ -15,28 +16,44 @@ _ = i18n.gettext  # Используется для перевода строк
 
 # Кастомная middleware с реализацией get_locale
 class CustomI18nMiddleware(I18nMiddleware):
-    async def get_locale(self, event: types.TelegramObject, data: dict) -> str:
-        if hasattr(event, 'from_user'):
+    async def get_locale(self, event, data: dict) -> str:
+        user_id = None
+        tg_locale = 'en'
+        if isinstance(event, Message) and event.from_user:
             user_id = event.from_user.id
+            tg_locale = getattr(event.from_user, 'language_code', 'en')[:2]
+        elif isinstance(event, CallbackQuery) and event.from_user:
+            user_id = event.from_user.id
+            tg_locale = getattr(event.from_user, 'language_code', 'en')[:2]
+        # fallback на случай других типов событий
+        elif hasattr(event, 'from_user') and event.from_user:
+            user_id = event.from_user.id
+            tg_locale = getattr(event.from_user, 'language_code', 'en')[:2]
+
+        print(f"Получение Id пользователя {user_id} с языком {tg_locale}")
+        # Если user_id не None, пытаемся получить локаль из базы
+        
+        if user_id is not None:
             db_locale = get_user_locale(user_id)
-            if db_locale:  # если есть в базе
+            print(f"Получение локали для пользователя {user_id}: {db_locale}")
+            if db_locale:
                 return db_locale
-            # если нет в базе, берём из Telegram
-            tg_locale = getattr(event.from_user, 'language_code', 'ru')[:2]
-            # приводим к нужному формату
-            if tg_locale == 'en':
-                set_user_locale(user_id, 'en')
-                return 'en'
-            elif tg_locale == 'uk':
-                set_user_locale(user_id, 'uk')
-                return 'uk'
+            # если нет в базе — записываем и возвращаем
+            if tg_locale == 'ru':
+                set_user_locale(user_id, 'ru')
+                return 'ru'
+            elif tg_locale in ['uk', 'ua']:
+                set_user_locale(user_id, 'ua')
+                return 'ua'
             elif tg_locale == 'pt':
                 set_user_locale(user_id, 'pt')
                 return 'pt'
             else:
-                set_user_locale(user_id, 'ru')
-                return 'ru'
-        return 'en' 
+                set_user_locale(user_id, 'en')
+                return 'en'
+        print(f"Не удалось определить пользователя, возвращаем en")
+        return 'en'
+
 
 def setup_i18n(dp: Dispatcher):
     dp.update.outer_middleware(CustomI18nMiddleware(i18n))

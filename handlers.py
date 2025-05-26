@@ -57,21 +57,34 @@ router.message.middleware(LocaleMiddleware())
 async def start_cmd(message: types.Message):
     await message.answer(_("Добро пожаловать! Выберите действие в меню."), reply_markup=get_main_menu())
 
-# Обработка меню: Список
-@router.message(F.text == (lambda: MENU_KEYS()["list"])())
-async def menu_list_cmd(message: types.Message):
-    bdays = get_birthdays()
-    if not bdays:
-        await message.answer(_("Список пуст."))
-    else:
-        reply = "\n".join([f"{b['name']}: {b['date']}" for b in bdays])
-        await message.answer(reply)
+# УНИВЕРСАЛЬНЫЙ обработчик для всех кнопок главного меню
+@router.message()
+async def main_menu_handler(message: types.Message, state: FSMContext):
+    keys = MENU_KEYS()
+    text = message.text
 
-# Обработка меню: Добавить — запуск FSM
-@router.message(F.text == (lambda: MENU_KEYS()["add"])())
-async def menu_add_cmd(message: types.Message, state: FSMContext):
-    await message.answer(_("Введите имя:"))
-    await state.set_state(AddBirthday.waiting_for_name)
+    if text == keys["list"]:
+        bdays = get_birthdays()
+        if not bdays:
+            await message.answer(_("Список пуст."))
+        else:
+            reply = "\n".join([f"{b['name']}: {b['date']}" for b in bdays])
+            await message.answer(reply)
+
+    elif text == keys["add"]:
+        await message.answer(_("Введите имя:"))
+        await state.set_state(AddBirthday.waiting_for_name)
+
+    elif text == keys["broadcast"]:
+        await message.answer(_("Чтобы воспользоваться рассылкой, используйте /broadcast текст_сообщения"))
+
+    elif text == keys["settings"]:
+        buttons = [
+            [KeyboardButton(text="🇷🇺 Русский"), KeyboardButton(text="🇺🇸 English")],
+            [KeyboardButton(text="🇺🇦 Українська"), KeyboardButton(text="🇵🇹 Português")]
+        ]
+        lang_menu = ReplyKeyboardMarkup(resize_keyboard=True, keyboard=buttons)
+        await message.answer(_("Выберите язык:"), reply_markup=lang_menu)
 
 # FSM: ждём имя
 @router.message(AddBirthday.waiting_for_name)
@@ -90,25 +103,10 @@ async def add_birthday_date(message: types.Message, state: FSMContext):
     await message.answer(_("День рождения добавлен!"), reply_markup=get_main_menu())
     await state.clear()
 
-# Обработка меню: Рассылка
-@router.message(F.text == (lambda: MENU_KEYS()["broadcast"])())
-async def menu_broadcast_cmd(message: types.Message):
-    await message.answer(_("Чтобы воспользоваться рассылкой, используйте /broadcast текст_сообщения"))
-
-# Обработка меню: Настройки
-@router.message(F.text == (lambda: MENU_KEYS()["settings"])())
-async def menu_settings_cmd(message: types.Message):
-    buttons = [
-        [KeyboardButton(text="🇷🇺 Русский"), KeyboardButton(text="🇺🇸 English")],
-        [KeyboardButton(text="🇺🇦 Українська"), KeyboardButton(text="🇵🇹 Português")]
-    ]
-    lang_menu = ReplyKeyboardMarkup(resize_keyboard=True, keyboard=buttons)
-    await message.answer(_("Выберите язык:"), reply_markup=lang_menu)
-
 # Обработка ручных слэш-команд (на случай, если пользователь ими пользуется)
 @router.message(Command("list"))
 async def list_cmd(message: types.Message):
-    await menu_list_cmd(message)
+    await main_menu_handler(message, state=None)
 
 @router.message(Command("delete"))
 async def delete_cmd(message: types.Message):

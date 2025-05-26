@@ -1,6 +1,7 @@
 import sqlite3
 
 def set_user_locale(user_id: int, locale: str):
+    print(f"Добавление/обновление пользователя {user_id} -> {locale}") 
     with sqlite3.connect("birthdays.db") as conn:
         cur = conn.cursor()
         cur.execute("""
@@ -25,6 +26,8 @@ def init_db():
         cur.execute('''CREATE TABLE IF NOT EXISTS birthdays
                        (id INTEGER PRIMARY KEY, name TEXT, date TEXT, note TEXT, contact TEXT)''')
         conn.commit()
+    cur.execute("SELECT * FROM user_locales")
+    print(cur.fetchall())
 
 def add_birthday(name, date, note='', contact=''):
     with sqlite3.connect("birthdays.db") as conn:
