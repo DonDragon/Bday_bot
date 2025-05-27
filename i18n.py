@@ -55,8 +55,8 @@ class CustomI18nMiddleware(I18nMiddleware):
                 set_user_locale(user_id, 'ru')
                 return 'ru'
             elif tg_locale in ['uk', 'ua']:
-                set_user_locale(user_id, 'ua')
-                return 'ua'
+                set_user_locale(user_id, 'uk')
+                return 'uk'
             elif tg_locale == 'pt':
                 set_user_locale(user_id, 'pt')
                 return 'pt'

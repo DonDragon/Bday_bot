@@ -5,7 +5,7 @@
 import polib
 import os
 
-languages = ['ru', 'en', 'ua', 'pt']
+languages = ['ru', 'en', 'uk', 'pt']
 base_dir = os.path.join(os.path.dirname(__file__), 'locales')
 
 for lang in languages:
